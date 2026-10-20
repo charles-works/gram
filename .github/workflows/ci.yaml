@@ -116,31 +116,16 @@ jobs:
           path: artifacts/*
 
   release-windows:
-    name: Release Windows (${{ matrix.os_label }})
+    name: Release Windows
     if: github.ref_type == 'tag' || startsWith(github.ref, 'refs/heads/test-release')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           - build: windows
-            os: windows-2019
-            os_label: Server 2012 R2 compatible
-            target: x86_64-pc-windows-msvc
-            artifact_name: windows-x64-server2012r2
-            rustflags: -C link-arg=/SUBSYSTEM:WINDOWS,6.03
-            winver: 0x0603
-          - build: windows
             os: windows-latest
-            os_label: current
             target: x86_64-pc-windows-msvc
             artifact_name: windows-x64
-            rustflags: -C link-arg=/SUBSYSTEM:WINDOWS,10.0
-            winver: 0x0A00
-    env:
-      RUSTFLAGS: ${{ matrix.rustflags }}
-      _WIN32_WINNT: ${{ matrix.winver }}
-      WINVER: ${{ matrix.winver }}
-      NTDDI_VERSION: ${{ matrix.winver }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a # v7.0.1
@@ -167,5 +152,43 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: gram-remote-server-${{ matrix.artifact_name}}-${{ matrix.target }}.zip
+          path: target/gram-remote-server-windows-x86_64.zip
+          if-no-files-found: warn
+
+  release-windows-server2012r2:
+    name: Release Windows Server 2012 R2
+    if: github.ref_type == 'tag' || startsWith(github.ref, 'refs/heads/test-release')
+    runs-on: windows-2019
+    env:
+      RUSTFLAGS: -C link-arg=/SUBSYSTEM:WINDOWS,6.03
+      _WIN32_WINNT: 0x0603
+      WINVER: 0x0603
+      NTDDI_VERSION: 0x0603
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Bundle Windows Server 2012 R2
+        shell: pwsh
+        run: script/bundle-windows.ps1 -Architecture x86_64
+
+      - name: List
+        shell: bash
+        run: ls -la target/*
+
+      - name: Upload Gram
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Gram-windows-x64-server2012r2-${{ matrix.target }}.exe
+          path: target/Gram-x86_64.exe
+          if-no-files-found: error
+
+      - name: Upload remote server
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gram-remote-server-windows-x64-server2012r2.zip
           path: target/gram-remote-server-windows-x86_64.zip
           if-no-files-found: warn
