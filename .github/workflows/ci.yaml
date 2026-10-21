@@ -148,13 +148,6 @@ jobs:
           path: target/Gram-x86_64.exe
           if-no-files-found: error
 
-      - name: Upload remote server
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: gram-remote-server-${{ matrix.artifact_name}}-${{ matrix.target }}.zip
-          path: target/gram-remote-server-windows-x86_64.zip
-          if-no-files-found: warn
-
   release-windows-server2012r2:
     name: Release Windows Server 2012 R2
     if: github.ref_type == 'tag' || startsWith(github.ref, 'refs/heads/test-release')
@@ -185,10 +178,3 @@ jobs:
           name: Gram-windows-x64-server2012r2-${{ matrix.target }}.exe
           path: target/Gram-x86_64.exe
           if-no-files-found: error
-
-      - name: Upload remote server
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: gram-remote-server-windows-x64-server2012r2.zip
-          path: target/gram-remote-server-windows-x86_64.zip
-          if-no-files-found: warn
